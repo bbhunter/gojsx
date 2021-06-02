@@ -16,6 +16,7 @@ func main() {
 	fmt.Println("=> gojsx by: ", author)
 	var url = flag.String("url", "", "=> url of your target")
 	var auth = flag.String("auth", "", "=> cookies from app")
+	var token = flag.String("tk", "", "=> Authorization tokens, like: Athorization Bearer.. JWT..")
 	var config = flag.String("config", "", "=> Config file regex ")
 	flag.Parse()
 
@@ -24,13 +25,14 @@ func main() {
 		fmt.Printf("\n Usage: %s -url https://target.com\n", os.Args[0])
 	}
 
-	fmt.Println(*auth)
-
 	parsed__url := verify.Verify_url(*url)
 
-	if verify.Target_is_alive(parsed__url) {
-		gojsx := new(Html_parser.Base)
-		gojsx.Url = parsed__url
+	gojsx := new(Html_parser.Base)
+	gojsx.Url = parsed__url
+	gojsx.Cookies = *auth
+	gojsx.Auth = *token
+
+	if gojsx.Target_is_alive() {
 		if *config != "" {
 			fmt.Println("=> Config file: ", *config)
 			gojsx.Yaml_config.Yaml_path = *config
@@ -40,7 +42,5 @@ func main() {
 			gojsx.Yaml_config.Yaml_path = "./Config/regexs.yaml"
 			gojsx.Get_content_body(parsed__url)
 		}
-
 	}
-
 }

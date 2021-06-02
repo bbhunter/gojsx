@@ -1,14 +1,11 @@
 package verify
 
 import (
-	"crypto/tls"
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"os"
 	"strings"
-	"time"
 )
 
 func Verify_url(url_input string) string {
@@ -35,43 +32,6 @@ func Verify_url(url_input string) string {
 		URL could be https://foo.bar/path1/path2/pathN..
 	*/
 
-}
-
-func Target_is_alive(url_input string) bool {
-
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	timeout := time.Duration(100 * time.Second)
-
-	cli := http.Client{
-		Timeout:   timeout,
-		Transport: tr,
-	}
-
-	req, err := http.NewRequest("GET", url_input, nil)
-	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36")
-	req.Header.Set("Connection", "close")
-	if err != nil {
-		log.Println(err)
-	}
-
-	resp, err := cli.Do(req)
-
-	if err != nil {
-		log.Println(err)
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode == 200 {
-		fmt.Printf("=> Status code from %s is [%d] OK!\n", url_input, resp.StatusCode)
-		return true
-	} else {
-		fmt.Println("=> Bad status code: ", resp.StatusCode)
-	}
-
-	return false
 }
 
 func Remove_duplicates_paths(paths []string) {

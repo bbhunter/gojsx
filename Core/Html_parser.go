@@ -2,6 +2,7 @@ package Html_parser
 
 import (
 	"crypto/tls"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -13,10 +14,60 @@ import (
 
 type Base struct {
 	Url         string
+	Cookies     string
+	Auth        string
 	Yaml_config Config
 }
 
+func (b *Base) Target_is_alive() bool {
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	timeout := time.Duration(100 * time.Second)
+
+	cli := http.Client{
+		Timeout:   timeout,
+		Transport: tr,
+	}
+
+	req, err := http.NewRequest("GET", b.Url, nil)
+	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36")
+
+	if b.Cookies != "" {
+		req.Header.Set("Cookie", b.Cookies)
+	}
+
+	if b.Auth != "" {
+		req.Header.Set("Authorization", b.Auth)
+	}
+
+	req.Header.Set("Connection", "close")
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	resp, err := cli.Do(req)
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 200 {
+		fmt.Printf("=> Status code from %s is [%d] OK!\n", b.Url, resp.StatusCode)
+		return true
+	} else {
+		fmt.Println("=> Bad status code: ", resp.StatusCode)
+	}
+
+	return false
+}
+
 func (b *Base) Get_content_body(url_parsed string) {
+
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -28,7 +79,17 @@ func (b *Base) Get_content_body(url_parsed string) {
 	}
 
 	req, err := http.NewRequest("GET", url_parsed, nil)
-	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36")
+
+	if b.Cookies != "" {
+		req.Header.Set("Cookie", b.Cookies)
+	}
+
+	if b.Auth != "" {
+		req.Header.Set("Authorization", b.Auth)
+	}
+
+	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.3611")
+
 	if err != nil {
 		log.Println(err)
 	}
@@ -126,6 +187,14 @@ func (b *Base) Get_page_body(paths []string) {
 		req, err := http.NewRequest("GET", url_path, nil)
 		req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36")
 		req.Header.Set("Connection", "Close")
+
+		if b.Cookies != "" {
+			req.Header.Set("Cookie", b.Cookies)
+		}
+
+		if b.Auth != "" {
+			req.Header.Set("Authorization", b.Auth)
+		}
 
 		if err != nil {
 			log.Println(err)
