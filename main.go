@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	author = "0xrod"
+	author = "r00td3v"
 )
 
 func main() {
