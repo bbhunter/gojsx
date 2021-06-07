@@ -25,10 +25,10 @@ func main() {
 		fmt.Printf("\n Usage: %s -url https://target.com\n", os.Args[0])
 	}
 
-	parsed__url := verify.Verify_url(*url)
+	parsed_url := verify.Verify_url(*url)
 
 	gojsx := new(Html_parser.Base)
-	gojsx.Url = parsed__url
+	gojsx.Url = parsed_url
 	gojsx.Cookies = *auth
 	gojsx.Auth = *token
 
@@ -36,11 +36,11 @@ func main() {
 		if *config != "" {
 			fmt.Println("=> Config file: ", *config)
 			gojsx.Yaml_config.Yaml_path = *config
-			gojsx.Get_content_body(parsed__url)
+			gojsx.Runner()
 		} else {
 			fmt.Println("=> Config file: ./Config/regexs.yaml")
 			gojsx.Yaml_config.Yaml_path = "./Config/regexs.yaml"
-			gojsx.Get_content_body(parsed__url)
+			gojsx.Runner()
 		}
 	}
 }

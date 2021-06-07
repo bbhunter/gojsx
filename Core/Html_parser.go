@@ -66,7 +66,7 @@ func (b *Base) Target_is_alive() bool {
 	return false
 }
 
-func (b *Base) Get_content_body(url_parsed string) {
+func (b *Base) Get_content_body() io.ReadCloser {
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -78,7 +78,7 @@ func (b *Base) Get_content_body(url_parsed string) {
 		Transport: tr,
 	}
 
-	req, err := http.NewRequest("GET", url_parsed, nil)
+	req, err := http.NewRequest("GET", b.Url, nil)
 
 	if b.Cookies != "" {
 		req.Header.Set("Cookie", b.Cookies)
@@ -100,10 +100,8 @@ func (b *Base) Get_content_body(url_parsed string) {
 		log.Println(err)
 	}
 
-	defer resp.Body.Close()
+	return resp.Body
 
-	b.scripts_found_HTML(resp.Body)
-	b.only_scripts_with_text(resp.Body)
 }
 
 func (b *Base) processElement(index int, element *goquery.Selection) {
@@ -120,19 +118,24 @@ func (b *Base) processElement(index int, element *goquery.Selection) {
 	b.parse_paths(paths)
 }
 
-func (b *Base) only_scripts_with_text(html_content io.Reader) {
+func (b *Base) only_scripts_with_text() {
 
-	document, err := goquery.NewDocument(b.Url)
+	html_content := b.Get_content_body()
+
+	document, err := goquery.NewDocumentFromReader(html_content)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	only_text := document.Find("script").Contents().Text()
+	only_text := document.Find("script").Text()
 	b.Yaml_config.Regex_Matcher_Text(only_text)
 }
 
-func (b *Base) scripts_found_HTML(html_content io.Reader) {
+func (b *Base) scripts_found_HTML() {
+
+	html_content := b.Get_content_body()
+
 	document, err := goquery.NewDocumentFromReader(html_content)
 
 	if err != nil {
@@ -210,5 +213,12 @@ func (b *Base) Get_page_body(paths []string) {
 		b.Yaml_config.Regex_Matcher(resp.Body)
 
 	}
+
+}
+
+func (b *Base) Runner() {
+	fmt.Println("=> Starting..")
+	b.scripts_found_HTML()
+	b.only_scripts_with_text()
 
 }
