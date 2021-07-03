@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	Html_parser "gojsx/Core"
 	verify "gojsx/Utils"
 	"os"
+	"sync"
 )
 
 const (
@@ -13,7 +15,7 @@ const (
 )
 
 func main() {
-	fmt.Println("=> gojsx by: ", author)
+	fmt.Printf("=> gojsx by: %s\n\n", author)
 	var url = flag.String("url", "", "=> url of your target")
 	var auth = flag.String("auth", "", "=> cookies from app")
 	var token = flag.String("tk", "", "=> Authorization tokens, like: Athorization Bearer.. JWT..")
@@ -21,12 +23,36 @@ func main() {
 	flag.Parse()
 
 	if *url == "" {
-		fmt.Println("=> URL not defined..")
-		fmt.Printf("\n Usage: %s -url https://target.com\n", os.Args[0])
+		stat, _ := os.Stdin.Stat()
+		if (stat.Mode() & os.ModeCharDevice) == 0 {
+			var wg sync.WaitGroup
+			sc := bufio.NewScanner(os.Stdin)
+			for sc.Scan() {
+				URL := sc.Text()
+				wg.Add(1)
+
+				go func() {
+					defer wg.Done()
+					parsed_url := verify.Verify_url(URL)
+					gojsx := new(Html_parser.Base)
+					gojsx.Url = parsed_url
+					if gojsx.Target_is_alive() {
+						if *config != "" {
+							gojsx.Yaml_config.Yaml_path = *config
+							gojsx.Runner()
+						} else {
+							gojsx.Yaml_config.Yaml_path = "./Config/regexs.yaml"
+							gojsx.Runner()
+						}
+					}
+				}()
+			}
+			wg.Wait()
+		}
+		os.Exit(0)
 	}
 
 	parsed_url := verify.Verify_url(*url)
-
 	gojsx := new(Html_parser.Base)
 	gojsx.Url = parsed_url
 	gojsx.Cookies = *auth
@@ -34,11 +60,9 @@ func main() {
 
 	if gojsx.Target_is_alive() {
 		if *config != "" {
-			fmt.Println("=> Config file: ", *config)
 			gojsx.Yaml_config.Yaml_path = *config
 			gojsx.Runner()
 		} else {
-			fmt.Println("=> Config file: ./Config/regexs.yaml")
 			gojsx.Yaml_config.Yaml_path = "./Config/regexs.yaml"
 			gojsx.Runner()
 		}

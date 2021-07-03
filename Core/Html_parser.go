@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -57,7 +58,7 @@ func (b *Base) Target_is_alive() bool {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 200 {
-		fmt.Printf("=> Status code from %s is [%d] OK!\n", b.Url, resp.StatusCode)
+		fmt.Printf("=> Status code from %s is [%d] OK! Starting parser\n", b.Url, resp.StatusCode)
 		return true
 	} else {
 		fmt.Println("=> Bad status code: ", resp.StatusCode)
@@ -171,10 +172,12 @@ func (b *Base) parse_paths(paths []string) {
 		}
 	}
 
-	b.Get_page_body(parsed_paths)
+	b.bulking(parsed_paths)
 }
 
-func (b *Base) Get_page_body(paths []string) {
+func (b *Base) Get_Page_body(url string, wg *sync.WaitGroup) {
+
+	defer wg.Done()
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -186,39 +189,46 @@ func (b *Base) Get_page_body(paths []string) {
 		Transport: tr,
 	}
 
-	for _, url_path := range paths {
-		req, err := http.NewRequest("GET", url_path, nil)
-		req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36")
-		req.Header.Set("Connection", "Close")
+	req, err := http.NewRequest("GET", url, nil)
+	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36")
+	req.Header.Set("Connection", "Close")
 
-		if b.Cookies != "" {
-			req.Header.Set("Cookie", b.Cookies)
-		}
-
-		if b.Auth != "" {
-			req.Header.Set("Authorization", b.Auth)
-		}
-
-		if err != nil {
-			log.Println(err)
-		}
-
-		resp, err := cli.Do(req)
-
-		if err != nil {
-			log.Println(err)
-		}
-
-		defer resp.Body.Close()
-		b.Yaml_config.Regex_Matcher(resp.Body)
-
+	if b.Cookies != "" {
+		req.Header.Set("Cookie", b.Cookies)
 	}
+
+	if b.Auth != "" {
+		req.Header.Set("Authorization", b.Auth)
+	}
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	resp, err := cli.Do(req)
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	defer resp.Body.Close()
+	b.Yaml_config.Regex_Matcher(resp.Body)
+}
+
+func (b *Base) bulking(paths []string) {
+
+	var wg sync.WaitGroup
+
+	for i := 1; i <= len(paths); i++ {
+		wg.Add(1)
+		go b.Get_Page_body(paths[i-1], &wg)
+	}
+	wg.Wait()
 
 }
 
 func (b *Base) Runner() {
-	fmt.Println("=> Starting..")
+
 	b.scripts_found_HTML()
 	b.only_scripts_with_text()
-
 }
