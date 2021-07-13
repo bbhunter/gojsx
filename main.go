@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	author = "r00td3v"
+	author = "rodnt"
 )
 
 func main() {
