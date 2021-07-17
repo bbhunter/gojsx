@@ -25,7 +25,7 @@ func (b *Base) Target_is_alive() bool {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-	timeout := time.Duration(100 * time.Second)
+	timeout := time.Duration(300 * time.Second)
 
 	cli := http.Client{
 		Timeout:   timeout,
@@ -33,7 +33,9 @@ func (b *Base) Target_is_alive() bool {
 	}
 
 	req, err := http.NewRequest("GET", b.Url, nil)
-	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36")
+	req.Header.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36")
+	req.Header.Add("Connection", "close")
+	req.Header.Add("Accept-Encoding", "identity")
 
 	if b.Cookies != "" {
 		req.Header.Set("Cookie", b.Cookies)
@@ -43,25 +45,24 @@ func (b *Base) Target_is_alive() bool {
 		req.Header.Set("Authorization", b.Auth)
 	}
 
-	req.Header.Set("Connection", "close")
-
 	if err != nil {
 		log.Println(err)
 	}
 
 	resp, err := cli.Do(req)
 
+	if err == io.EOF {
+		fmt.Println("EOF FOund inside target is alive function")
+	}
+
 	if err != nil {
-		log.Println(err)
+		log.Fatalln("[!] Target it's alive.. ", err)
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 200 {
-		fmt.Printf("=> Status code from %s is [%d] OK! Starting parser\n", b.Url, resp.StatusCode)
 		return true
-	} else {
-		fmt.Println("=> Bad status code: ", resp.StatusCode)
 	}
 
 	return false
@@ -143,7 +144,8 @@ func (b *Base) scripts_found_HTML() {
 		log.Fatal(err)
 	}
 
-	document.Find("script").Each(b.processElement)
+	scripts := document.Find("script").Each(b.processElement)
+	b.Yaml_config.Regex_Matcher_Text(scripts.Text())
 }
 
 func (b *Base) parse_paths(paths []string) {
@@ -212,7 +214,7 @@ func (b *Base) Get_Page_body(url string, wg *sync.WaitGroup) {
 	}
 
 	defer resp.Body.Close()
-	b.Yaml_config.Regex_Matcher(resp.Body)
+	b.Yaml_config.Regex_Matcher(resp.Body, url)
 }
 
 func (b *Base) bulking(paths []string) {

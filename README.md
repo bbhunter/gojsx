@@ -13,6 +13,7 @@
     - Yaml config file ( see regexs_sample.yaml)
 
 #### Features
+- Regexs extracted from [https://github.com/l4yton/RegHex](https://github.com/l4yton/RegHex) many thanks @l4yton =)
 - Sessions single URL
 - Concurrency
 - Multiple URLs Scan ( testing phase )
@@ -24,4 +25,4 @@
     - Tunning regex
 
 #### Running
-![gojsx](./test.gif)
+![gojsx](./gojsx.gif)

@@ -5,8 +5,33 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"runtime"
 	"strings"
 )
+
+var Reset = "\033[0m"
+var Red = "\033[31m"
+var Green = "\033[32m"
+var Yellow = "\033[33m"
+var Blue = "\033[34m"
+var Purple = "\033[35m"
+var Cyan = "\033[36m"
+var Gray = "\033[37m"
+var White = "\033[97m"
+
+func init() {
+	if runtime.GOOS == "windows" {
+		Reset = ""
+		Red = ""
+		Green = ""
+		Yellow = ""
+		Blue = ""
+		Purple = ""
+		Cyan = ""
+		Gray = ""
+		White = ""
+	}
+}
 
 func Verify_url(url_input string) string {
 	u, err := url.Parse(url_input)
@@ -34,7 +59,7 @@ func Verify_url(url_input string) string {
 
 }
 
-func Remove_duplicates_paths(paths []string) {
+func Remove_duplicates_paths(paths []string, url string) {
 
 	keys := make(map[string]bool)
 	list := []string{}
@@ -43,28 +68,38 @@ func Remove_duplicates_paths(paths []string) {
 		if !inside_deny_list(path) {
 			if _, value := keys[path]; !value {
 				keys[path] = true
-				list = append(list, path)
+				if path != "" {
+					list = append(list, path)
+				}
 			}
 		}
 	}
 
-	show_results(list)
+	show_results(list, url)
 
 }
 
 func inside_deny_list(path string) bool {
-	slice_deny_list := []string{"https://momentjs.com", "twitter.com", "http://fb.me", "www.youtube.com", "http://www.w3.org", "https://developer.mozilla.org", "http://momentjs.com", "http://www.w3.org/1999/xlink", "http://www.w3.org/2000/svg", "https://npms.io/", "http://www.w3.org/2000", "https://npms.io/search?q=ponyfill", "www.w3.org", "www.googleoptimize.com", "modernizr.com", "dev.w3.org", "schema.org", "google.com", "bit.ly", "https://schema.org", "linkdedin.com", "example.com", "https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent#Polyfill"}
+	slice_deny_list := []string{"momentjs", "googletagmanager", "github.com", "gstatic.com", "googleapis.com", "twitter.com", "fb.me", "youtube.com", "w3.org", "developer.mozilla.org", "npms.io", "googleoptimize.com", "modernizr.com", "dev.w3.org", "schema.org", "google.com", "bit.ly", "schema.org", "linkdedin.com", "example.com", "mozilla.org", "jquery.org", "reactjs.org", "doubleclick.net", "google", "google-analytics"}
 
 	for _, deny_url := range slice_deny_list {
 		if strings.Contains(path, deny_url) {
 			return true
+		} else {
+			return false
 		}
 	}
 	return false
 }
 
-func show_results(results []string) {
+func show_results(results []string, url string) {
 	for _, v := range results {
-		fmt.Println("=> Found: ", v)
+		if v != "" {
+			fmt.Println("##############################")
+			u := fmt.Sprintf("\n"+Yellow+"[*] Results: [%s]"+Reset, url)
+			u_found := fmt.Sprintf("\n"+Cyan+"[X] Found: %s\n"+Reset, v)
+			fmt.Printf("\n%s\n%s\n", u, u_found)
+			fmt.Println("##############################")
+		}
 	}
 }

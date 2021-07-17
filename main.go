@@ -3,19 +3,14 @@ package main
 import (
 	"bufio"
 	"flag"
-	"fmt"
 	Html_parser "gojsx/Core"
 	verify "gojsx/Utils"
 	"os"
 	"sync"
 )
 
-const (
-	author = "rodnt"
-)
-
 func main() {
-	fmt.Printf("=> gojsx by: %s\n\n", author)
+	verify.PrintBanner()
 	var url = flag.String("url", "", "=> url of your target")
 	var auth = flag.String("auth", "", "=> cookies from app")
 	var token = flag.String("tk", "", "=> Authorization tokens, like: Athorization Bearer.. JWT..")

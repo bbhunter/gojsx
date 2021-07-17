@@ -52,7 +52,7 @@ func (c *Config) Regex_Matcher_Text(js_text string) {
 
 }
 
-func (c *Config) Regex_Matcher(js_content io.ReadCloser) {
+func (c *Config) Regex_Matcher(js_content io.ReadCloser, url string) {
 
 	var yaml_file Yaml_File
 
@@ -86,11 +86,13 @@ func (c *Config) Regex_Matcher(js_content io.ReadCloser) {
 		if matched {
 			re := regexp.MustCompile(v).FindAllString(string(data), 10)
 			for _, m := range re {
-				slice_of_matchs = append(slice_of_matchs, m)
+				if m != "" {
+					slice_of_matchs = append(slice_of_matchs, m)
+				}
 			}
 		}
 	}
 
-	verify.Remove_duplicates_paths(slice_of_matchs)
+	verify.Remove_duplicates_paths(slice_of_matchs, url)
 
 }

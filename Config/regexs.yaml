@@ -1,23 +1,10 @@
   regexs:
-  - https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)
-  - "(\\w*.)firebaseio.com"
-  - (?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])
-  - "([^A-Z0-9]|^)(AKIA|A3T|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{12,}"
-  - "[a-z0-9.-]+\\.s3\\.amazonaws\\.com"
-  - "[a-z0-9.-]+\\.s3-[a-z0-9-]\\.amazonaws\\.com"
-  - "[a-z0-9.-]+\\.s3-website[.-](eu|ap|us|ca|sa|cn)"
-  - ".*[a-zA-z0-9_].amazonaws.com/.*[a-zA-z0-9_]"
-  - "(/api/[a-zA-Z].{30})"
-  - "(Authorization[a-zA-Z].{40})"
+  - "AIza[0-9A-Za-z\\-_]{35}"
+  - 'bearer [a-zA-Z0-9_\\-\\.=]+'
+  - 'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'
+  - '(eyJ|YTo|Tzo|PD[89]|aHR0cHM6L|aHR0cDo|rO0)[a-zA-Z0-9+/]+={0,2}'
+  - "(?i)aws(.{0,20})?(?-i)['\"][0-9a-zA-Z\\/+]{40}['\"]"
+  - "(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}"
+  - "firebase.initializeApp(.*\\s*[\\w*\\s*a-zA-Z]*\\w.*){100}"
   - "//s3\\.amazonaws\\.com/[a-z0-9._-]+"
   - "//s3-[a-z0-9-]+\\.amazonaws\\.com/[a-z0-9._-]+"
-  - "^Bearer([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$)"
-  - "accesstoken.*[a-zA-z0-9_]"
-  - "token=(\\[a-zA-Z]*){30}"
-  - "Apitoken=.*[a-zA-z0-9_]"
-  - "firebase.initializeApp(.*\\s*[\\w*\\s*a-zA-Z]*\\w.*){100}"
-  - "apiKey=.*[a-zA-z0-9_]"
-  - "apiSecret=.*[a-zA-z0-9_]"
-  - "vtex-api-(appkey|apptoken)"
-  - "\u003cinput[^\u003e]+type=[\"']?file[\"']?"
-  - "(Application-Trace|Routing Error|DEBUG\"? ?[=:] ?True|Caused by:|stack trace:|Microsoft .NET Framework|Traceback|[0-9]:in `|#!/us|WebApplicationException|java\\.lang\\.|phpinfo|swaggerUi|on line [0-9]|SQLSTATE)"
